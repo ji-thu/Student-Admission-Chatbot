@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login to Student Chatbot</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #121212;
+            color: white;
+        }
+        .login-container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(24, 24, 24, 0.7);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 60px rgba(0,0,0,.5);
+            backdrop-filter: blur(15px);
+            max-width: 400px;
+            width: 90%;
+            height: 500px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        p {
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+        .g_id_signin {
+            margin: 0 auto; /* Center the Google sign-in button */
+        }
+        .guest-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            width: 280px; /* Match width of Google button */
+            box-sizing: border-box;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .guest-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        #error-message {
+            color: #ff4d4d;
+            margin-top: 20px;
+            min-height: 20px; /* Reserve space to prevent layout shift */
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>MBITS Student Assistant</h1>
+        <p>Please sign in to continue.</p>
+        
+        <!-- Google Sign-In Initialization -->
+        <div id="g_id_onload"
+             data-client_id="277541411603-vbpvrpcevv56pod90gur0c0vfrftg79j.apps.googleusercontent.com" 
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+
+        <!-- Google Sign-In Button -->
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="rectangular"
+             data-theme="outline"
+             data-text="continue_with"
+             data-size="large"
+             data-logo_alignment="left">
+        </div>
+
+        <!-- Guest Button -->
+        <button class="guest-button" onclick="continueAsGuest()">Continue as Guest</button>
+
+        <!-- Error Message Display -->
+        <p id="error-message"></p>
+    </div>
+
+    <script>
+        // --- Handles the response from Google Sign-In ---
+        async function handleCredentialResponse(response) {
+            console.log("Encoded JWT ID token: " + response.credential);
+            const errorMessageElement = document.getElementById('error-message');
+            errorMessageElement.textContent = ''; // Clear previous errors
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: response.credential }),
+                });
+
+                if (res.ok) {
+                    // If login is successful, redirect to the chat page
+                    window.location.href = '/chat_page';
+                } else {
+                    errorMessageElement.textContent = 'Authentication failed. Please try again.';
+                }
+            } catch (error) {
+                console.error("Error during login:", error);
+                errorMessageElement.textContent = 'An error occurred during login.';
+            }
+        }
+
+        // --- Handles Continue as Guest ---
+        function continueAsGuest() {
+            fetch('/guest_login', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/chat_page';
+                    } else {
+                        document.getElementById('error-message').textContent = "Could not continue as guest.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Guest login error:", error);
+                    document.getElementById('error-message').textContent = "An error occurred.";
+                });
+        }
+    </script>
+</body>
+</html>

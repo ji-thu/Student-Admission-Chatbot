@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBITS | Mar Baselios Institute of Technology and Science</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-gold: #ffcc00;
+            --text-dark: #333;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary-gold);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: 
+                        url('https://poly.mbits.ac.in/wp-content/uploads/2024/05/DJI_0023-1024x575.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .hero h1 { font-size: 3rem; margin-bottom: 10px; }
+
+        /* Chatbot Widget Container */
+        #chat-widget-container{
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+#chat-greeting {
+    background: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-right: 20px;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s ease;
+    pointer-events: none; /* Prevents box from blocking clicks */
+    position: relative;
+    border: 1px solid #eee;
+}
+#chat-greeting strong { display: block; color: #333; font-size: 14px; }
+#chat-greeting p { margin: 0; color: #777; font-size: 12px; }
+
+/* The small arrow on the greeting box */
+.greeting-arrow {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0; 
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid white;
+}
+#chat-widget-container:hover #chat-greeting {
+    opacity: 1;
+    transform: translateX(0);
+}
+#chat-button {
+    background: white;
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+#chat-button:active { transform: scale(0.9); }
+.notification-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #ff3b30;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    z-index: 2;
+}
+.chat-icon { width: 55px; height: 55px; }
+
+/* Chat Window Frame */
+#chat-window {
+    display: none;
+    position: fixed;
+    bottom: 120px;
+    right: 30px;
+    width: 400px;
+    height: 600px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+    z-index: 9999;
+}
+#chat-button:hover {
+    transform: scale(1.1);
+}
+
+.icon-circle {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-icon {
+    width: 50px; /* Adjust size of the bubble inside the white circle */
+    height: 50px;
+}
+@media (max-width: 600px) {
+    #chat-greeting { display: none; }
+}
+
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">MBITS
+            <img src="https://mbits.ac.in/wp-content/uploads/2026/01/logo-mob-scaled.jpeg" alt="" width="200" height="40">
+        </div>
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Departments</a></li>
+            <li><a href="#">Admissions</a></li>
+            <li><a href="#">Placements</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero">
+        <h1>Welcome to MBITS</h1>
+        <p>Excellence in Engineering and Management</p>
+    </header>
+
+    <section style="padding: 50px 10%; text-align: center;">
+        <h2>About Our College</h2>
+        <p>Mar Baselios Institute of Technology and Science (MBITS) is a premier institution dedicated to providing quality technical education.</p>
+    </section>
+
+    <div id="chat-widget-container">
+    <div id="chat-greeting">
+        <strong>We're Online!</strong>
+        <p>How may I help you today?</p>
+        <div class="greeting-arrow"></div>
+    </div>
+
+    <div id="chat-window">
+        <iframe src="http://127.0.0.1:5000/"></iframe>
+    </div>
+    
+    <button id="chat-button" onclick="toggleChat()">
+        
+        <div class="icon-circle">
+            <svg class="chat-icon" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="bubbleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#7f70ff;" />
+                        <stop offset="100%" style="stop-color:#00008b;" />
+                    </linearGradient>
+                </defs>
+                <path d="M20,35 Q20,25 35,25 L75,25 Q90,25 90,35 L90,55 Q90,65 75,65 L50,65 L35,80 L35,65 Q20,65 20,55 Z" fill="url(#bubbleGradient)" />
+                <text x="40" y="52" fill="white" font-size="22">✦</text>
+                <text x="62" y="58" fill="white" font-size="14">✦</text>
+            </svg>
+        </div>
+    </button>
+</div>
+
+
+
+    <script>
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+                chatWindow.style.display = 'block';
+            } else {
+                chatWindow.style.display = 'none';
+            }
+        }
+        document.addEventListener("click", function(e){
+    const chatWindow = document.getElementById("chat-window");
+    const chatButton = document.getElementById("chat-button");
+
+    if(!chatWindow.contains(e.target) && !chatButton.contains(e.target)){
+        chatWindow.style.display = "none";
+    }
+});
+    </script>
+
+</body>
+</html>

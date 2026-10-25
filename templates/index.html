@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background-dark: #1f1f1f;
+      --container-bg: #303134;
+      --bot-message-bg: #2a2a2d;
+      --user-message-bg: #333a52;
+      --text-primary: #e0e0e0;
+      --text-secondary: #9aa0a6;
+      --font-family-main: 'Google Sans', 'Inter', sans-serif;
+      --border-radius-lg: 28px;
+      --border-radius-md: 20px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-family-main);
+      background: var(--background-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 800px;
+      height: 100vh;
+      background: rgba(255, 255, 255);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      flex-shrink: 0;
+      background: rgb(6, 84, 193);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .guest-btn {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .guest-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 20px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .chat-body {
+      flex: 1;
+      padding: 0 24px;
+      padding-top: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+   .mic-btn {
+  background: transparent; /* Removes the circle background */
+  border: none;
+  color: #b0b0b0; /* Subtle grey matching image_cbbc7f */
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  outline: none;
+  /* Adjusting size to match image_cbbfa1 */
+  width: 24px; 
+  height: 24px;
+}
+
+/* Hover state: Subtle brightness increase */
+.mic-btn:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* Listening State: Simple color change to red or white */
+.mic-btn.listening {
+  color: #ef4444; /* Standard 'Recording' red */
+  animation: breathe 1.5s infinite ease-in-out;
+}
+
+@keyframes breathe {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+    .chat-body::-webkit-scrollbar { display: none; }
+    .message { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 4px; 
+        max-width: 85%; 
+    }
+    .bot { align-self: flex-start; color: #1c1b1b;}
+    .user { align-self: flex-end; align-items: flex-end; color: #1c1b1b;}
+    .message-container { display: flex; flex-direction: column; width: 100%; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar svg { width: 22px; height: 22px; }
+    
+    .message-bubble { padding: 14px 20px; border-radius: var(--border-radius-md); font-size: .88em; line-height: 1.6; word-wrap: break-word; position: relative; }
+    .bot .message-bubble { background: var(--bot-message-bg); color: var(--text-primary); border-bottom-left-radius: 5px; }
+    .user .message-bubble { background: var(--user-message-bg); color: var(--text-primary); border-bottom-right-radius: 5px; }
+    .user .avatar { background: rgba(255,255,255,.2); }
+    .timestamp { font-size: 0.75em; color: var(--text-secondary); margin-top: 6px; padding: 0 5px; }
+    .bot .timestamp { align-self: flex-start; }
+    .user .timestamp { align-self: flex-end; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s, background-color 0.2s; }
+    .bot .message-bubble:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+    .copy-btn svg { width: 16px; height: 16px; }
+    .suggested-questions-container { display: flex; gap: 10px; padding: 10px 0; flex-wrap: wrap; }
+    .suggestion-chip { padding: 8px 16px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; font-size: 0.8em; cursor: pointer; transition: all .2s ease; color: #000000; }
+    .suggestion-chip:hover { background: var(--user-message-bg); border-color: var(--user-message-bg); transform: translateY(-2px); color: #ffffff;}
+    .thinking-indicator { display: flex; align-items: center; gap: 12px; padding: 14px 20px; font-size: .98em; color: var(--text-secondary); font-style: italic; }
+    .thinking-indicator .thinking-svg { width: 24px; height: 24px; animation: spin 1.5s linear infinite; }
+    .chat-footer { padding: 20px 24px; flex-shrink: 0; }
+    .input-container { width: 100%; display: flex; align-items: center; background-color: var(--container-bg); border-radius: var(--border-radius-lg); padding: 0 8px 0 20px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3); }
+    .input-container input { flex-grow: 1; height: 56px; border: none; outline: none; background: transparent; color: var(--text-primary); font-size: 14px; font-family: var(--font-family-main); }
+    .input-container input::placeholder { color: var(--text-secondary); }
+    .input-container input:disabled { cursor: not-allowed; }
+    #sendButton { width: 48px; height: 48px; border: none; border-radius: 50%; background: transparent; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; margin-left: 8px; flex-shrink: 0; }
+    #sendButton:not(:disabled) { background-color: var(--user-message-bg); color: var(--text-primary); }
+    #sendButton:hover:not(:disabled) { transform: scale(1.1); }
+    #sendButton:disabled { cursor: not-allowed; opacity: 0.5; }
+    #sendButton svg { width: 24px; height: 24px; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>🤖</h1>
+      <h3>Student Chatbot</h3>
+      <div class="header-right">
+        <button class="guest-btn" id="guestBtn">Continue as Guest</button>
+        <div class="user-avatar" id="user-avatar">J</div>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody"></div>
+
+    <div class="chat-footer">
+      <div class="input-container">
+        <input type="text" id="userInput" placeholder="Ask me anything..." />
+        <button id="voiceBtn" class="mic-btn">
+           <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+  </svg>
+        </button>
+        <button id="sendButton" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CHAT_API_URL = "http://127.0.0.1:5000/chat";
+    const chatBody = document.getElementById("chatBody");
+    const userInput = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    const userAvatarBtn = document.getElementById("user-avatar"); 
+    const guestBtn = document.getElementById("guestBtn");
+
+    async function initializeChat(isGuest = false) {
+      try {
+        let user;
+        if (isGuest) {
+          user = { name: "Guest User" };
+          userAvatarBtn.textContent = "G";
+        } else {
+          const resUser = await fetch('/getuserinfo');
+          if (!resUser.ok) {
+            window.location.href = '/';
+            return;
+          }
+          user = await resUser.json();
+          userAvatarBtn.textContent = user.name.charAt(0).toUpperCase();
+        }
+
+        const resHistory = await fetch('/get_history');
+        let history = [];
+        if (resHistory.ok) history = await resHistory.json();
+
+        chatBody.innerHTML = '';
+        if (history.length > 0 && !isGuest) {
+          history.forEach(chat => addMessage(chat.message, chat.role));
+          renderSuggestions(["Admission Process?", "Courses Offered", "Campus facilities"]);
+        } else {
+          const welcomeName = (user.name || "User").split(' ')[0];
+          addMessage(`Welcome, ${welcomeName}! I'm your student assistant chatbot. How can I help you today?`, "bot");
+          renderSuggestions(["Admission Process?", "Courses Offered", "Campus facilities"]);
+        }
+        toggleSendButton();
+        scrollToBottom();
+      } catch (err) {
+        console.error(err);
+        addMessage("⚠️ Could not load chat session.", "bot");
+      }
+    }
+
+    function renderSuggestions(suggestions = []) {
+      const existing = document.getElementById("suggestions");
+      if (existing) existing.remove();
+      if (suggestions.length === 0) return;
+      const container = document.createElement("div");
+      container.id = "suggestions";
+      container.className = "suggested-questions-container";
+      suggestions.forEach(text => {
+        const chip = document.createElement("div");
+        chip.className = "suggestion-chip";
+        chip.textContent = text;
+        chip.addEventListener("click", () => {
+      sendMessage(text);  // send the suggestion as a message
+    });
+        container.appendChild(chip);
+      });
+      chatBody.appendChild(container);
+      scrollToBottom();
+    }
+
+    async function sendMessage(text) {
+      const messageText = text || userInput.value.trim();
+      if (messageText === "" || userInput.disabled) return;
+      addMessage(messageText, "user");
+      userInput.value = "";
+      const existingSuggestions = document.getElementById("suggestions");
+      if (existingSuggestions) existingSuggestions.remove();
+      userInput.disabled = true;
+      toggleSendButton();
+      const thinking = showThinkingIndicator();
+
+      try {
+        const res = await fetch(CHAT_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: messageText }),
+        });
+        const data = await res.json();
+        const reply = data.reply || "Sorry, something went wrong.";
+        const suggestions = data.suggestions || [];
+        setTimeout(() => {
+          thinking.remove();
+          addMessage(reply, "bot");
+          renderSuggestions(suggestions);
+          userInput.disabled = false;
+          toggleSendButton();
+          userInput.focus();
+        }, 800);
+      } catch (err) {
+        thinking.remove();
+        addMessage(`⚠️ Error: ${err.message}`, "bot");
+        userInput.disabled = false;
+        toggleSendButton();
+      }
+    }
+
+    function addMessage(text, sender) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `message ${sender}`;
+
+      // Label Header (MBITS or You)
+      const label = document.createElement("div");
+      label.className = "sender-label";
+      label.textContent = (sender === 'bot' || sender === 'assistant') ? "MBITS" : "You";
+
+      const bubbleRow = document.createElement("div");
+      bubbleRow.className = "bubble-row";
+
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.innerHTML = String(text).replace(/\n/g, '<br>');
+
+      const timestamp = document.createElement("div");
+      timestamp.className = "timestamp";
+      timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (sender === 'user') {
+          bubbleRow.append(timestamp, bubble);
+      } else {
+          bubbleRow.append(bubble, timestamp);
+      }
+
+      wrapper.append(label, bubbleRow);
+      chatBody.appendChild(wrapper);
+      scrollToBottom();
+    }
+
+    function showThinkingIndicator() {
+      const wrap = document.createElement("div");
+      wrap.className = "message bot";
+      const ind = document.createElement("div");
+      ind.className = "thinking-indicator";
+      ind.innerHTML = `<svg class="thinking-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg><span>Thinking...</span>`;
+      wrap.append(ind);
+      chatBody.appendChild(wrap);
+      scrollToBottom();
+      return wrap;
+    }
+
+    function scrollToBottom() {
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function toggleSendButton() {
+      sendButton.disabled = userInput.value.trim() === "";
+    }
+
+    sendButton.addEventListener("click", () => sendMessage());
+    userInput.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    userInput.addEventListener("input", toggleSendButton);
+    guestBtn.addEventListener("click", () => initializeChat(true));
+    userAvatarBtn.addEventListener("click", () => {
+      if (confirm("Logout?")) window.location.href = '/logout';
+    });
+
+    window.addEventListener("DOMContentLoaded", () => initializeChat(false));
+   // 🎤 Voice Logic
+let recognition;
+if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    
+    // settings
+    recognition.lang = "en-IN"; 
+    recognition.continuous = false;
+    recognition.interimResults = true; // Changed to true to help detection
+
+    voiceBtn.addEventListener("click", () => {
+        try {
+            userInput.placeholder = "Listening...";
+            recognition.start();
+        } catch (e) { console.log("Recognition already active"); }
+    });
+
+    recognition.onstart = () => {
+        console.log("--- STARTED ---");
+        voiceBtn.classList.add("listening");
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript; // Live updates input field
+        
+        if (event.results[0].isFinal) {
+            console.log("--- FINAL RESULT:", transcript);
+            toggleSendButton();
+            sendMessage(transcript);
+        }
+    };
+
+    recognition.onerror = (event) => {
+        console.error("--- ERROR:", event.error);
+        voiceBtn.classList.remove("listening");
+        userInput.placeholder = "Ask me anything...";
+        if(event.error === 'no-speech') alert("Mic heard nothing. Speak louder!");
+    };
+
+    recognition.onend = () => {
+        console.log("--- ENDED ---");
+        voiceBtn.classList.remove("listening");
+        userInput.placeholder = "Ask me anything...";
+    };
+}
+  </script>
+</body>
+</html>

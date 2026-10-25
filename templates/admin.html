@@ -1,0 +1,489 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root {
+    --bg: #0f0f1a;
+    --card: #1c1c2e;
+    --accent: #6A6AFF;
+    --text: #e0e0ff;
+    --sub: #a0a0d0;
+    --input: #2c2c4a;
+    --success: #00ffbb;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,#0f0f1a,#1a1a2e);
+    color: var(--text);
+    padding: 30px;
+}
+
+.admin-card {
+    background: var(--card);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+h2 {
+    color: var(--accent);
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.primary { background: var(--accent); color:white; }
+.success { background: var(--success); color:black; }
+.danger { background: red; color:white; }
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--input);
+    color: white;
+}
+
+textarea { min-height: 80px; }
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+}
+
+th { color: var(--accent); }
+
+.action-btn {
+    margin-right: 5px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border:none;
+    cursor:pointer;
+}
+
+.edit { background: #6A6AFF; color:white; }
+.delete { background: red; color:white; }
+
+.toggle-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.search-box {
+    display:flex;
+    align-items:center;
+    background: var(--input);
+    padding: 8px;
+    border-radius: 8px;
+    width: 250px;
+}
+
+.search-box input {
+    background:none;
+    border:none;
+    color:white;
+    outline:none;
+    width:100%;
+}
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #2c2c54;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    border-left: 5px solid #00ffbb;
+}
+
+.toast.update {
+    border-left: 5px solid #6A6AFF;
+}
+
+.toast.error {
+    border-left: 5px solid red;
+}
+</style>
+</head>
+
+<body>
+    <div id="toast" class="toast"></div>
+
+<div class="top-bar">
+    <h2>Admin Dashboard</h2>
+    <button class="danger" onclick="logoutAdmin()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</div>
+
+<!-- ===== TOGGLE BUTTONS ===== -->
+<div class="admin-card toggle-bar">
+    <button class="primary" onclick="toggleForm()">
+        <i class="fas fa-plus"></i> Add Intent
+    </button>
+
+    <button class="primary" onclick="toggleUsers()">
+        <i class="fas fa-users"></i> Manage Users
+    </button>
+
+    <button class="primary" onclick="toggleTopics()">
+    <i class="fas fa-chart-line"></i> Analytics
+</button>
+</div>
+
+<!-- ===== FORM ===== -->
+<div class="admin-card" id="formCard" style="display:none;">
+<form id="intentForm">
+    <h2 id="form-title">Add Intent</h2>
+
+    <div class="input-group">
+        <label>Intent</label>
+        <input id="intent" required>
+    </div>
+
+    <div class="input-group">
+        <label>Patterns</label>
+        <textarea id="patterns" required></textarea>
+    </div>
+
+    <div class="input-group">
+        <label>Responses</label>
+        <textarea id="responses" required></textarea>
+    </div>
+
+    <div class="input-group">
+        <label>Follow Ups</label>
+        <input id="followups">
+    </div>
+
+    <button class="success" type="submit">Save</button>
+</form>
+</div>
+
+<!-- ===== USERS ===== -->
+<!-- ===== USERS ===== -->
+<div class="admin-card" id="userSection" style="display:none;">
+
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <h2>Users</h2>
+
+        <input 
+            type="text" 
+            id="userSearch" 
+            placeholder="Search users..."
+            onkeyup="searchUsers()"
+            style="padding:8px; border-radius:8px; border:none; background:#2c2c4a; color:white;"
+        >
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+                <th>Time</th>
+                <th>Send Email</th>
+            </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+    </table>
+
+</div>
+
+
+<!-- ===== TOP TOPICS ===== -->
+<div class="admin-card" id="topicSection" style="display:none;">
+    <h2><i class="fas fa-chart-bar"></i> Most Searched Topics</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Topic</th>
+                <th>Search Count</th>
+            </tr>
+        </thead>
+        <tbody id="topicTable"></tbody>
+    </table>
+</div>
+
+<!-- ===== INTENTS ===== -->
+<div class="admin-card">
+    <div style="display:flex; justify-content:space-between;">
+        <h2>Existing Intents</h2>
+
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search..." onkeyup="searchIntents()" id="searchInput">
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Intent</th>
+                <th>Patterns</th>
+                <th>Responses</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="intentsTable"></tbody>
+    </table>
+</div>
+
+<script>
+const API = "/admin/intents";
+
+// ===== TOGGLE (ONLY ONE OPEN) =====
+function toggleForm(){
+    document.getElementById("formCard").style.display = "block";
+    document.getElementById("userSection").style.display = "none";
+    document.getElementById("topicSection").style.display = "none";
+}
+
+function toggleUsers(){
+    document.getElementById("userSection").style.display = "block";
+    document.getElementById("formCard").style.display = "none";
+    document.getElementById("topicSection").style.display = "none";
+
+    loadUsers();
+}
+
+function toggleTopics(){
+    document.getElementById("topicSection").style.display = "block";
+    document.getElementById("formCard").style.display = "none";
+    document.getElementById("userSection").style.display = "none";
+
+    loadTopics();
+}
+
+// ===== LOAD INTENTS =====
+async function loadIntents(){
+    const res = await fetch(API);
+    const data = await res.json();
+    const table = document.getElementById("intentsTable");
+    table.innerHTML="";
+
+    data.forEach(i=>{
+        table.innerHTML+=`
+        <tr>
+            <td>${i.intent}</td>
+            <td>${i.patterns.length}</td>
+            <td>${i.responses.length}</td>
+            <td>
+                <button class="action-btn edit" onclick="editIntent('${i.intent}')">Edit</button>
+                <button class="action-btn delete" onclick="deleteIntent('${i.intent}')">Delete</button>
+            </td>
+        </tr>`;
+    });
+}
+
+// ===== EDIT (AUTO OPEN FORM + FILL DATA) =====
+async function editIntent(name){
+    toggleForm(); // 🔥 open form automatically
+
+    const res = await fetch(API);
+    const data = await res.json();
+    const item = data.find(d => d.intent === name);
+
+    if(!item) return;
+
+    document.getElementById("intent").value = item.intent;
+    document.getElementById("patterns").value = item.patterns.join(", ");
+    document.getElementById("responses").value = item.responses.join(" || ");
+    document.getElementById("followups").value = (item.follow_up_suggestions || []).join(", ");
+
+    document.getElementById("intentForm").setAttribute("data-original", item.intent);
+    document.getElementById("form-title").innerText = "Edit Intent";
+}
+
+// ===== SAVE / UPDATE =====
+document.getElementById("intentForm").onsubmit = async(e)=>{
+    e.preventDefault();
+
+    const original = document.getElementById("intentForm").getAttribute("data-original");
+
+    const payload = {
+        intent: intent.value.trim(),
+        patterns: patterns.value.split(",").map(x=>x.trim()),
+        responses: responses.value.split("||").map(x=>x.trim()),
+        follow_up_suggestions: followups.value.split(",").map(x=>x.trim())
+    };
+
+    const url = original ? `${API}/${original}` : API;
+    const method = original ? "PUT" : "POST";
+
+    await fetch(url,{
+        method:method,
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(payload)
+    });
+
+    showToast(original ? "Intent Updated Successfully!" : "Intent Saved Successfully!", original ? "update" : "success");
+
+    document.getElementById("intentForm").reset();
+    document.getElementById("intentForm").removeAttribute("data-original");
+    document.getElementById("form-title").innerText = "Add Intent";
+
+    loadIntents();
+};
+
+// ===== DELETE =====
+async function deleteIntent(name){
+    if(!confirm("Delete this intent?")) return;
+    await fetch(API+"/"+name,{method:"DELETE"});
+    loadIntents();
+}
+
+// ===== USERS =====
+async function loadUsers(){
+    const res = await fetch("/admin/users");
+    const data = await res.json();
+
+    const table = document.getElementById("userTable");
+    table.innerHTML = "";
+
+    data.forEach(u=>{
+        const name = u.name || "User";
+        const email = u.email || "-";
+        const action = u.action || "-";
+        const time = u.time || "-";
+
+        table.innerHTML += `
+        <tr>
+            <td>${name}</td>
+            <td>${email}</td>
+            <td>${action}</td>
+            <td>${time}</td>
+            <td>
+                <button class="action-btn edit" onclick="sendEmail('${email}')">
+                    📧 Send
+                </button>
+            </td>
+        </tr>`;
+    });
+}
+
+
+
+// Toggle topics (close others)
+function toggleTopics(){
+    document.getElementById("topicSection").style.display = "block";
+    document.getElementById("formCard").style.display = "none";
+    document.getElementById("userSection").style.display = "none";
+
+    loadTopics();
+}
+
+// Load topics
+async function loadTopics(){
+    const res = await fetch("/admin/top-topics");
+    const data = await res.json();
+
+    const table = document.getElementById("topicTable");
+    table.innerHTML = "";
+
+    data.forEach(t=>{
+        table.innerHTML += `
+        <tr>
+            <td>${t[0].toUpperCase()}</td>
+            <td>${t[1]}</td>
+        </tr>`;
+    });
+}
+
+// ===== SEARCH =====
+function searchIntents(){
+    const filter=document.getElementById("searchInput").value.toLowerCase();
+    const rows=document.getElementById("intentsTable").getElementsByTagName("tr");
+
+    for(let r of rows){
+        const text=r.cells[0].innerText.toLowerCase();
+        r.style.display=text.includes(filter)?"":"none";
+    }
+}
+
+// ===== LOGOUT =====
+function logoutAdmin(){
+    window.location.href="/admin_logout";
+}
+
+// INIT
+loadIntents();
+function showToast(message, type="success"){
+    const toast = document.getElementById("toast");
+
+    toast.innerText = message;
+    toast.className = "toast show " + type;
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3000);
+}
+function sendEmail(email){
+    const subject = "MBITS Admission Assistance";
+    const body = "Hello,\n\nThank you for your interest. We are here to guide you.\n\nMBITS Team";
+
+    const mailto = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailto;
+}
+
+function searchUsers(){
+    const filter = document.getElementById("userSearch").value.toLowerCase();
+    const rows = document.getElementById("userTable").getElementsByTagName("tr");
+
+    for(let r of rows){
+        const name = r.cells[0].innerText.toLowerCase();
+        const email = r.cells[1].innerText.toLowerCase();
+
+        r.style.display = (name.includes(filter) || email.includes(filter)) ? "" : "none";
+    }
+}
+</script>
+
+</body>
+</html>

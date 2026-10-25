@@ -1,0 +1,44 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python generated files
+__pycache__/
+*.py[cod]
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local development files
+.vscode/
+.idea/
+
+# Local chat history, if generated
+chat_histories/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local ML training and evaluation artifacts
+chatbot_model.pth
+chatbot_train.txt
+cached_lm_GPT2Tokenizer_128_chatbot_train.txt
+evaluation_data.json
+confusion_matrix.png
+
+# Keep secrets private
+.env
+.env.*
+!.env.example
+
+gpt2-chatbot/
